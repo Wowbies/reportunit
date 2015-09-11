@@ -263,7 +263,8 @@
                     html = html.Replace(ReportHelper.MarkupFlag("inserttest"), HTML.File.Test)
                         .Replace(ReportHelper.MarkupFlag("testname"), test.Name)
                         .Replace(ReportHelper.MarkupFlag("teststatus"), test.Status.ToString().ToLower())
-                        .Replace(ReportHelper.MarkupFlag("teststatusmsg"), test.StatusMessage);
+                        .Replace(ReportHelper.MarkupFlag("teststatusmsg"), test.StatusMessage)
+                        .Replace(ReportHelper.MarkupFlag("testconsolelogs"), test.ConsoleLogs);
 
                     foreach (string category in test.Categories)
                     {

@@ -512,6 +512,9 @@
 									<h4></h4>
 									<div class='log'></div>
 								</div>
+                                <div class='modal-footer'>
+                                    <a href='#!' class='modal-action modal-close waves-effect waves-green btn-flat'>Close</a>
+                                </div>
 							</div>
                         </body>
                         <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js'></script>
@@ -523,7 +526,7 @@
                             $(document).ready(function() {
                                 $('pre').each(function() {
 									if ($(this).text().length > 1000) {
-										if ($(this).is('.console-output, .stack-trace')) {
+										if ($(this).is('.stack-trace')) {
 											$(this).after('<button class=""btn modal-trigger dynamic-modal"" href=""#dynamic-modal"">' + $(this).prop('class') + '</button>').addClass('hide');
 										}
 									}
@@ -780,8 +783,9 @@
             {
                 return @"<tr>
                             <td class='test-name'><!--%TESTNAME%--></td>
-                            <td class='<!--%TESTSTATUS%-->'><!--%TESTSTATUS%--><!--%TESTSTATUSMSG%--></td>
+                            <td class='<!--%TESTSTATUS%-->'><!--%TESTSTATUS%--><!--%TESTCONSOLELOGS%--><!--%TESTSTATUSMSG%--></td>
                             <td class='test-features <!--%TESTFEATURE%-->'></td>
+     
                         </tr>
                         <!--%INSERTTEST%-->";
             }

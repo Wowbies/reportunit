@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml;
 using ReportUnit.Support;
 using ReportUnit.Layer;
@@ -97,9 +98,12 @@ namespace ReportUnit.Parser
         {
             if (testLines.Count > 0)
             {
-                Console.WriteLine("Adding Consol Output{0}", currentTest);
-                var content = string.Join(Environment.NewLine, testLines.ToArray());
-                _consoleOutput.Add(currentTest,content);
+                var sb = new StringBuilder();
+                foreach (var testLine in testLines)
+                {
+                    sb.AppendLine(string.Format("<p>{0}</p>", testLine));
+                }
+                _consoleOutput.Add(currentTest, sb.ToString());
                 testLines.Clear();
             }
         }
@@ -336,9 +340,20 @@ namespace ReportUnit.Parser
                         errorMsg += "</pre>";
                         errorMsg = errorMsg == "<pre class='stack-trace'></pre>" ? "" : errorMsg;
                     }
-                    if (_consoleOutput.ContainsKey(tcName))
+                    if (_consoleOutput.ContainsKey(tcName) && !String.IsNullOrWhiteSpace(_consoleOutput[tcName]))
                     {
-                        tc.ConsoleLogs = "<pre class='console-output'>" + _consoleOutput[tcName].Replace(Environment.NewLine, "<br />")+"</pre>";
+                        tc.ConsoleLogs = String.Format(@"
+                             <div id='{1}' class='modal'>
+                                <div class='modal-content'>
+                                    <h4>{2}</h4>
+                                    {0}
+                                </div>
+                                <div class='modal-footer'>
+                                    <a href='#!' class='modal-action modal-close waves-effect waves-green btn-flat'>Close</a>
+                                </div>
+                            </div>
+                            <a class='modal-trigger waves-effect waves-light console-logs-icon tooltipped' data-position='left' data-tooltip='Console Logs' href='#{1}'><i class='mdi-action-assignment'></i></a>
+                            ", _consoleOutput[tcName], tcName.Replace(".","_"), tcName);
                     }
 
                     XmlNode desc = testcase.SelectSingleNode(".//property[@name='Description']");
@@ -351,7 +366,7 @@ namespace ReportUnit.Parser
                     }
 
                    
-                    tc.StatusMessage = descMsg + errorMsg + tc.ConsoleLogs;
+                    tc.StatusMessage = descMsg + errorMsg;
                     testSuite.Tests.Add(tc);
 
                     Console.Write("\r{0} tests processed...", ++testCount);
