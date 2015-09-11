@@ -241,7 +241,7 @@ namespace ReportUnit.Parser
             foreach (XmlNode suite in testSuiteNodes)
             {
                 var testSuite = new TestSuite();
-                testSuite.Name = suite.Attributes["name"].InnerText.Replace(_assemblyNameWithoutExtension + ".", "").Trim();
+                testSuite.Name = nodeFriendlyName(suite,_assemblyNameWithoutExtension);
 
                 if (suite.Attributes["start-time"] != null && suite.Attributes["end-time"] != null)
                 {
@@ -285,10 +285,11 @@ namespace ReportUnit.Parser
                     errorMsg = descMsg = "";
 
                     var tc = new Test();
-                    var tcName = testcase.Attributes["name"].InnerText;
-                    tc.Name = tcName.Replace("<", "[").Replace(">", "]").Replace(testSuite.Name + ".", "").Replace(_assemblyNameWithoutExtension + ".", "");
-                   
-					// figure out the status reslt of the test
+                    var tcAssemblyName = testcase.Attributes["name"].InnerText;
+
+                    var tcFriendlyName = nodeFriendlyName(testcase, _assemblyNameWithoutExtension, testSuite.Name);
+                    tc.Name = tcFriendlyName;
+                    // figure out the status reslt of the test
 	                if (testcase.Attributes["result"] != null)
 	                {
 		                tc.Status = testcase.Attributes["result"].InnerText.AsStatus();
@@ -339,7 +340,7 @@ namespace ReportUnit.Parser
                         errorMsg += "</pre>";
                         errorMsg = errorMsg == "<pre class='stack-trace'></pre>" ? "" : errorMsg;
                     }
-                    if (_consoleOutput.ContainsKey(tcName) && !String.IsNullOrWhiteSpace(_consoleOutput[tcName]))
+                    if (_consoleOutput.ContainsKey(tcAssemblyName) && !String.IsNullOrWhiteSpace(_consoleOutput[tcAssemblyName]))
                     {
                         tc.ConsoleLogs = String.Format(@"
                              <div id='{1}' class='modal'>
@@ -352,7 +353,7 @@ namespace ReportUnit.Parser
                                 </div>
                             </div>
                             <a class='modal-trigger waves-effect waves-light console-logs-icon tooltipped' data-position='left' data-tooltip='Console Logs' href='#{1}'><i class='mdi-action-assignment'></i></a>
-                            ", _consoleOutput[tcName], tcName.Replace(".","_"), tcName);
+                            ", _consoleOutput[tcAssemblyName], tcAssemblyName.Replace(".","_"), tcAssemblyName);
                     }
 
                     XmlNode desc = testcase.SelectSingleNode(".//property[@name='Description']");
@@ -375,6 +376,25 @@ namespace ReportUnit.Parser
 
                 _report.TestFixtures.Add(testSuite);
             }
+        }
+
+        private string nodeFriendlyName(XmlNode node, string assemblyNameWithoutExtension, string testSuiteName)
+        {
+            return nodeFriendlyName(node, _assemblyNameWithoutExtension).Replace(testSuiteName + ".", "");
+        }
+
+        private string nodeFriendlyName(XmlNode node, string assemblyNameWithoutExtension)
+        {
+            string assemblyName = node.Attributes["name"].InnerText;
+            var tcDescription = string.Empty;
+            if (node.Attributes["description"] != null)
+                tcDescription = node.Attributes["description"].InnerText;
+            var tcFriendlyName = string.IsNullOrWhiteSpace(tcDescription)
+                ? assemblyName.Replace("<", "[")
+                    .Replace(">", "]")
+                    .Replace(_assemblyNameWithoutExtension + ".", "")
+                : tcDescription;
+            return tcFriendlyName;
         }
 
         public NUnit() { }
