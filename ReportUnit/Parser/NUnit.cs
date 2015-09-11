@@ -34,10 +34,10 @@ namespace ReportUnit.Parser
         private string _consoleOutputFile = "";
         
 
-		/// <summary>
-		/// Usually evaluates to the assembly name. Used to clean up test names so its easier to read in the outputted html.
-		/// </summary>
-		private string _fileNameWithoutExtension;
+        /// <summary>
+        /// Used to clean up test names so its easier to read in the outputted html.
+        /// </summary>
+        private string _assemblyNameWithoutExtension;
 
         /// <summary>
         /// Contains test-suite level data to be passed to the Folder level report to build summary
@@ -111,15 +111,14 @@ namespace ReportUnit.Parser
 
         public Report ProcessFile()
         {
-	        _fileNameWithoutExtension = Path.GetFileNameWithoutExtension(this._testResultFile);
-
-            // create a data instance to be passed to the folder level report
+	        // create a data instance to be passed to the folder level report
             _report = new Report();
             _report.FileName = this._testResultFile;
             _report.RunInfo.TestRunner = TestRunner.NUnit;
             // get total count of tests from the input file
             _report.Total = _doc.GetElementsByTagName("test-case").Count;
             _report.AssemblyName = _doc.SelectNodes("//test-suite")[0].Attributes["name"].InnerText;
+            _assemblyNameWithoutExtension = Path.GetFileNameWithoutExtension(_report.AssemblyName);
 
             logger.Info("Number of tests: " + _report.Total);
 
@@ -233,7 +232,7 @@ namespace ReportUnit.Parser
 			// if other test runner type is outputting its results in nunit format - then may not have full markup - so just get all "test-suite" nodes
 	        if (testSuiteNodes.Count == 0)
 			{
-				testSuiteNodes = _doc.SelectNodes(string.Format("//test-suite[contains(@name, '{0}.')]", _fileNameWithoutExtension));
+				testSuiteNodes = _doc.SelectNodes(string.Format("//test-suite[contains(@name, '{0}.')]", _assemblyNameWithoutExtension));
 		        
 	        }
             int testCount = 0;
@@ -242,7 +241,7 @@ namespace ReportUnit.Parser
             foreach (XmlNode suite in testSuiteNodes)
             {
                 var testSuite = new TestSuite();
-				testSuite.Name = suite.Attributes["name"].InnerText.Replace(_fileNameWithoutExtension + ".", "").Trim();
+                testSuite.Name = suite.Attributes["name"].InnerText.Replace(_assemblyNameWithoutExtension + ".", "").Trim();
 
                 if (suite.Attributes["start-time"] != null && suite.Attributes["end-time"] != null)
                 {
@@ -287,7 +286,7 @@ namespace ReportUnit.Parser
 
                     var tc = new Test();
                     var tcName = testcase.Attributes["name"].InnerText;
-					tc.Name = tcName.Replace("<", "[").Replace(">", "]").Replace(testSuite.Name + ".", "").Replace(_fileNameWithoutExtension + ".", "");
+                    tc.Name = tcName.Replace("<", "[").Replace(">", "]").Replace(testSuite.Name + ".", "").Replace(_assemblyNameWithoutExtension + ".", "");
                    
 					// figure out the status reslt of the test
 	                if (testcase.Attributes["result"] != null)
