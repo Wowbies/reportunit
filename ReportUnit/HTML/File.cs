@@ -375,6 +375,13 @@
                                         display: none;
                                     }
                                 }
+                                .btn.dynamic-modal {
+                                    display: block !important;
+                                    font-size: 10px !important;
+                                    letter-spacing: 0 !important;
+                                    margin-top: 10px !important;
+                                    padding: 0 1rem !important;
+                                }
                             </style>
                             <!--%OPTIONALCSS%-->
                         </head>
@@ -500,6 +507,12 @@
                                     <a href='#!' class='modal-action modal-close waves-effect waves-green btn-flat'>Close</a>
                                 </div>
                             </div>
+                            <div id='dynamic-modal' class='modal'>
+                                <div class='modal-content'>
+									<h4></h4>
+									<div class='log'></div>
+								</div>
+							</div>
                         </body>
                         <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js'></script>
                         <script src='http://cdnjs.cloudflare.com/ajax/libs/masonry/3.2.2/masonry.pkgd.min.js' type='text/javascript' charset='utf-8'></script>
@@ -508,6 +521,17 @@
                         <script type='text/javascript'>
                             google.load('visualization', '1', {packages:['corechart']});
                             $(document).ready(function() {
+                                $('pre').each(function() {
+									if ($(this).text().length > 1000) {
+										if ($(this).is('.console-output, .stack-trace')) {
+											$(this).after('<button class=""btn modal-trigger dynamic-modal"" href=""#dynamic-modal"">' + $(this).prop('class') + '</button>').addClass('hide');
+										}
+									}
+								});
+								$('.dynamic-modal').click(function() {
+									$('#dynamic-modal h4').text($(this).closest('tr').find('.test-name').text());
+									$('#dynamic-modal .log').text($(this).prev().text());
+								});
                                 $('select').material_select();
                                 $('.modal-trigger').leanModal();
                                 $('.tooltipped').tooltip({delay: 20});

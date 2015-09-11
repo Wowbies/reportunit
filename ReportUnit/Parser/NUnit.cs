@@ -331,14 +331,14 @@ namespace ReportUnit.Parser
 
                     if (message != null)
                     {
-                        errorMsg = "<pre>" + message.InnerText.Trim();
+                        errorMsg = "<pre class='stack-trace'>" + message.InnerText.Trim();
                         errorMsg += testcase.SelectSingleNode(".//stack-trace") != null ? " -> " + testcase.SelectSingleNode(".//stack-trace").InnerText.Replace("\r", "").Replace("\n", "") : "";
                         errorMsg += "</pre>";
-                        errorMsg = errorMsg == "<pre></pre>" ? "" : errorMsg;
+                        errorMsg = errorMsg == "<pre class='stack-trace'></pre>" ? "" : errorMsg;
                     }
                     if (_consoleOutput.ContainsKey(tcName))
                     {
-                        tc.ConsoleLogs = "<pre>" + _consoleOutput[tcName].Replace(Environment.NewLine, "<br />")+"</pre>";
+                        tc.ConsoleLogs = "<pre class='console-output'>" + _consoleOutput[tcName].Replace(Environment.NewLine, "<br />")+"</pre>";
                     }
 
                     XmlNode desc = testcase.SelectSingleNode(".//property[@name='Description']");
